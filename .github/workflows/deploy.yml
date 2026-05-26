@@ -1,9 +1,15 @@
 name: Deploy to GitHub Pages
 
-"on":
+on:
   push:
     branches:
       - main
+    paths:
+      - 'index.html'
+      - 'styles.css'
+      - 'app.js'
+      - 'README.md'
+      - '.github/workflows/deploy.yaml'
   workflow_dispatch:
 
 permissions:
@@ -29,17 +35,10 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Prepare static site
-        run: |
-          mkdir -p _site
-          cp interview.html _site/index.html
-          cp styles.css app.js data.yaml sample.yaml README.md _site/
-          touch _site/.nojekyll
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: .
 
       - name: Deploy to GitHub Pages
         id: deployment
