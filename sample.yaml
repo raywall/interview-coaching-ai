@@ -1,0 +1,39 @@
+name: 
+company: 
+business: 
+role: 
+
+target:
+  company: 
+  business: 
+  role: 
+
+resume:
+  achievements: |
+    abcd
+
+  professional_background: |
+    abcd
+
+  technical_skills: |
+    abcd
+
+  highlights: |
+    abcd
+
+interviewer:
+  name: 
+  role: 
+  company: 
+  background: |
+    abcd
+  style: |
+    abcd
+  overview: | 
+    abcd
+
+context: 
+  overview: |
+    abcd
+  case: |
+    abcd

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>Coach de Entrevista</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Sora:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+</head>
+
+<body>
+
+  <!-- ══════════════════════════════════════
+     SETUP SCREEN
+══════════════════════════════════════ -->
+  <div id="screen-setup" class="screen active">
+    <div class="setup-hero">
+      <div class="tag">COACH DE ENTREVISTA</div>
+      <h1 class="hero-title">Configure<br>seu Perfil</h1>
+      <p class="hero-sub">Essas informações guiam o coach<br>em tempo real durante a entrevista.</p>
+    </div>
+
+    <div class="form-body">
+
+      <!-- YAML Import -->
+      <div class="section-div" style="margin-top:0">IMPORTAR PERFIL</div>
+      <div class="yaml-import-zone" id="yaml-zone" ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')" ondrop="handleYamlDrop(event)">
+        <input type="file" accept=".yaml,.yml" onchange="handleYamlFile(this.files[0])">
+        <div id="yaml-idle">
+          <div class="yaml-icon">📂</div>
+          <div class="yaml-import-title">Arraste o arquivo <strong>.yaml</strong> ou clique para escolher</div>
+          <div class="yaml-import-sub">Preenche todos os campos automaticamente</div>
+        </div>
+        <div class="yaml-success" id="yaml-ok">
+          ✅ <span id="yaml-ok-name">Perfil carregado com sucesso!</span>
+        </div>
+      </div>
+
+      <!-- Candidato -->
+      <div class="field"><label>SEU NOME</label><input id="f-nome" type="text"></div>
+      <div class="field"><label>CARGO ATUAL</label><input id="f-cargo-atual" type="text" value="Engenheiro Senior"></div>
+      <div class="field"><label>CARGO ALVO (VAGA)</label><input id="f-cargo-alvo" type="text"
+          value="Especialista em Engenharia"></div>
+      <div class="fields-row">
+        <div class="field half"><label>PRODUTO ATUAL</label><input id="f-business" type="text" placeholder="Ex: Crédito Consignado"></div>
+        <div class="field half"><label>PRODUTO ALVO</label><input id="f-target-business" type="text" placeholder="Ex: Garantias"></div>
+      </div>
+
+      <div class="section-div">SUA TRAJETÓRIA</div>
+
+      <div class="field">
+        <label>CONQUISTAS PRINCIPAIS</label>
+        <div class="hint">Ex: Migração com 0% downtime, reduzi custos em 40%, sistema com X transações/dia...</div>
+        <textarea id="f-conquistas" rows="4"></textarea>
+      </div>
+      <div class="field">
+        <label>EXPERIÊNCIAS RELEVANTES</label>
+        <div class="hint">Ex: 8 anos em dev, 3 como tech lead, projetos de pagamentos e crédito...</div>
+        <textarea id="f-experiencias" rows="4"></textarea>
+      </div>
+      <div class="field">
+        <label>HABILIDADES TÉCNICAS</label>
+        <div class="hint">Ex: Java, Python, AWS, Kubernetes, microsserviços, IA aplicada...</div>
+        <textarea id="f-habilidades" rows="3"></textarea>
+      </div>
+      <div class="field">
+        <label>PONTOS QUE QUERO DESTACAR</label>
+        <div class="hint">Ex: Visão sistêmica, simplificar o complexo, liderança técnica...</div>
+        <textarea id="f-destaques" rows="3"></textarea>
+      </div>
+
+      <!-- Entrevistador -->
+      <div class="section-div">PERFIL DO ENTREVISTADOR</div>
+      <div class="info-box green">
+        <span class="tip-icon">🔍</span>
+        <span>Cole aqui o que você extraiu do Copilot ou LinkedIn. O coach adapta as sugestões ao perfil de quem te
+          entrevista.</span>
+      </div>
+      <div class="field">
+        <label>NOME E CARGO DO ENTREVISTADOR</label>
+        <div class="hint">Ex: João Silva — Gerente Sênior de Engenharia, 12 anos no Itaú...</div>
+        <input id="f-entrev-nome" type="text">
+      </div>
+      <div class="field">
+        <label>BACKGROUND E TRAJETÓRIA</label>
+        <div class="hint">Formação, empresas anteriores, áreas de atuação...</div>
+        <textarea id="f-entrev-background" rows="3"></textarea>
+      </div>
+      <div class="field">
+        <label>ESTILO E INTERESSES TÉCNICOS</label>
+        <div class="hint">Ex: Foco em cultura de engenharia, posts sobre IA, valoriza dados...</div>
+        <textarea id="f-entrev-estilo" rows="3"></textarea>
+      </div>
+      <div class="field">
+        <label>TEXTO COMPLETO DO COPILOT / LINKEDIN</label>
+        <div class="hint">Cole o texto bruto aqui. O coach vai extrair o que for relevante.</div>
+        <textarea id="f-entrev-raw" rows="5" placeholder="Cole aqui o texto extraído..."></textarea>
+      </div>
+
+      <!-- APIs -->
+      <div class="section-div">CONFIGURAÇÃO DE API</div>
+
+      <div class="info-box blue">
+        <span class="tip-icon">🎙️</span>
+        <span><strong style="color:#4a8adf">Modo Microfone</strong> — não precisa de chave. Usa o reconhecimento de voz
+          do próprio browser (só a sua voz).</span>
+      </div>
+      <div class="info-box amber">
+        <span class="tip-icon">🖥️</span>
+        <span><strong style="color:#c87800">Modo Sistema/Teams</strong> — captura os dois lados da conversa via Whisper
+          (OpenAI). Precisa de uma chave da OpenAI. Crie em <strong>platform.openai.com</strong> → API keys.</span>
+      </div>
+
+      <div class="field">
+        <label>CHAVE OPENAI (PARA MODO TEAMS/SISTEMA)</label>
+        <div class="hint">Necessária apenas no Modo Sistema. Fica salva só no seu browser.</div>
+        <input id="f-openai-key" type="password" placeholder="sk-...">
+      </div>
+
+      <!-- Notas -->
+      <div class="section-div">CONTEXTO PARA O COACH</div>
+      <div class="field">
+        <label>NOTAS PARA O COACH</label>
+        <div class="hint">O coach usa isso para calibrar as orientações.</div>
+        <textarea id="f-notas"
+          rows="3">Tenho autismo, TDAH e altas habilidades. Posso falar demais, fugir do assunto e ficar ansioso. Me ajude a ser objetivo e confiante.</textarea>
+      </div>
+      <div class="field">
+        <label>CASE DO PROCESSO SELETIVO</label>
+        <div class="hint">Descreva a proposta que você apresentou nas etapas anteriores. O coach vai sugerir quando e como mencionar pontos do case.</div>
+        <textarea id="f-case" rows="6" placeholder="Ex: Proposta de arquitetura multi-tenant para plataforma de Garantias..."></textarea>
+      </div>
+
+    </div><!-- /form-body -->
+
+    <div class="bottom-fixed">
+      <button class="btn-primary" onclick="goToInterview()">▶ ENTRAR NA ENTREVISTA</button>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════
+     INTERVIEW SCREEN
+══════════════════════════════════════ -->
+  <div id="screen-interview" class="screen">
+
+    <div class="interview-header">
+      <button class="ghost-btn" onclick="goToSetup()">← Perfil</button>
+      <div class="status-row">
+        <div id="speak-timer" class="speak-timer ok" style="display:none">
+          <span>⏱</span>
+          <span id="timer-display">00:00</span>
+          <span id="timer-alert" class="alert-text" style="display:none">CONCLUA</span>
+        </div>
+        <div id="rec-dot" class="rec-dot"></div>
+        <span id="rec-label" class="rec-label">PARADO</span>
+        <span id="analyzing-badge" class="analyzing-badge" style="display:none">IA…</span>
+      </div>
+      <button class="ghost-btn" onclick="resetSession()">↺</button>
+    </div>
+
+    <div id="messages-area" class="messages-area">
+      <div id="empty-state" class="empty-state">
+        <div class="empty-icon">🎙️</div>
+        <div class="empty-text">
+          Escolha o modo e toque em <strong>INICIAR</strong>.<br>
+          O coach vai te guiar em tempo real.
+        </div>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <div class="mode-toggle-row">
+        <button id="btn-mode-mic" class="mode-btn selected mic" onclick="selectMode('mic')">🎤 MICROFONE</button>
+        <button id="btn-mode-system" class="mode-btn system" onclick="selectMode('system')">🖥️ SISTEMA/TEAMS</button>
+      </div>
+      <button id="btn-record" class="btn-record start-mic" onclick="toggleRecording()">▶ INICIAR SESSÃO</button>
+    </div>
+  </div>
+
+
+  <script src="app.js"></script>
+</body>
+
+</html>
